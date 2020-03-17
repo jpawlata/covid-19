@@ -503,7 +503,7 @@ Requires: Rcpp, plyr, stringr
 
 Package: rgdal
 Source: CRAN
-Version: 1.4-8
+Version: 1.3-9
 Hash: bff6f6bbb137f645fd789f7eab0f05b9
 Requires: sp
 
