@@ -1,0 +1,259 @@
+{
+  "input": {
+    "map_bounds": {
+      "north": 54.546579538405,
+      "east": 27.509765625,
+      "south": 49.1242192485914,
+      "west": 10.7666015625
+    },
+    "map_center": {
+      "lng": 19.145136,
+      "lat": 51.919438
+    },
+    "map_zoom": 6,
+    "sidebarCollapsed": false,
+    "sidebarItemExpanded": null
+  },
+  "output": {
+    "box.death": {
+      "html": "<div class=\"small-box bg-red\">\n  <div class=\"inner\">\n    <h3>Total deaths:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">5<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-times-circle\"><\/i>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "font-awesome",
+          "version": "5.3.1",
+          "src": {
+            "href": "font-awesome-5.3.1"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": [
+            "css/all.min.css",
+            "css/v4-shims.min.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "box.sick": {
+      "html": "<div class=\"small-box bg-red\">\n  <div class=\"inner\">\n    <h3>Infected:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">221<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-stethoscope\"><\/i>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "font-awesome",
+          "version": "5.3.1",
+          "src": {
+            "href": "font-awesome-5.3.1"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": [
+            "css/all.min.css",
+            "css/v4-shims.min.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "map": {
+      "x": {
+        "options": {
+          "crs": {
+            "crsClass": "L.CRS.EPSG3857",
+            "code": null,
+            "proj4def": null,
+            "projectedBounds": null,
+            "options": {
+
+            }
+          }
+        },
+        "setView": [
+          [
+            51.919438,
+            19.145136
+          ],
+          6,
+          [
+
+          ]
+        ],
+        "calls": [
+          {
+            "method": "addProviderTiles",
+            "args": [
+              "CartoDB.Positron",
+              null,
+              null,
+              {
+                "errorTileUrl": "",
+                "noWrap": true,
+                "detectRetina": false
+              }
+            ]
+          },
+          {
+            "method": "addCircleMarkers",
+            "args": [
+              [
+                50.3310747765321,
+                50.6471110846816,
+                52.3307826139123,
+                53.5848233467655,
+                50.7633878209738,
+                53.0727040125614,
+                53.2645182274677,
+                51.0895007707307,
+                49.9536736387413,
+                49.8589472783918,
+                54.1547034850771,
+                53.8572119637752,
+                51.6048652915179,
+                52.3457575449826,
+                51.2207188848422,
+                52.1961723821276
+              ],
+              [
+                18.9940938394922,
+                17.8998733614567,
+                17.2431024344824,
+                15.5430704203707,
+                20.7690890203153,
+                18.4882168336402,
+                22.9293053026516,
+                16.4106866467873,
+                22.1691162098164,
+                20.2693342857047,
+                17.986713739798,
+                20.8249305200629,
+                19.4175962727068,
+                21.0964452483008,
+                22.90026682334,
+                15.3427455364701
+              ],
+              [
+                25,
+                8,
+                11,
+                6,
+                4,
+                8,
+                0,
+                30,
+                11,
+                4,
+                3,
+                7,
+                42,
+                39,
+                21,
+                2
+              ],
+              null,
+              null,
+              {
+                "interactive": true,
+                "className": "",
+                "stroke": true,
+                "color": "#CC5500",
+                "weight": 5,
+                "opacity": 0.5,
+                "fill": true,
+                "fillColor": "orange",
+                "fillOpacity": 0.5
+              },
+              null,
+              null,
+              [
+                "<strong>Śląskie<\/strong><br/>Number of patients: 25<br/>Number of deaths: 0",
+                "<strong>Opolskie<\/strong><br/>Number of patients: 8<br/>Number of deaths: 0",
+                "<strong>Wielkopolskie<\/strong><br/>Number of patients: 11<br/>Number of deaths: 1",
+                "<strong>Zachodniopomorskie<\/strong><br/>Number of patients: 6<br/>Number of deaths: 0",
+                "<strong>Świętokrzyskie<\/strong><br/>Number of patients: 4<br/>Number of deaths: 0",
+                "<strong>Kujawsko-Pomorskie<\/strong><br/>Number of patients: 8<br/>Number of deaths: 0",
+                "<strong>Podlaskie<\/strong><br/>Number of patients: 0<br/>Number of deaths: 0",
+                "<strong>Dolnośląskie<\/strong><br/>Number of patients: 30<br/>Number of deaths: 2",
+                "<strong>Podkarpackie<\/strong><br/>Number of patients: 11<br/>Number of deaths: 1",
+                "<strong>Małopolskie<\/strong><br/>Number of patients: 4<br/>Number of deaths: 0",
+                "<strong>Pomorskie<\/strong><br/>Number of patients: 3<br/>Number of deaths: 0",
+                "<strong>Warmińsko-Mazurskie<\/strong><br/>Number of patients: 7<br/>Number of deaths: 0",
+                "<strong>Łódzkie<\/strong><br/>Number of patients: 42<br/>Number of deaths: 0",
+                "<strong>Mazowieckie<\/strong><br/>Number of patients: 39<br/>Number of deaths: 0",
+                "<strong>Lubelskie<\/strong><br/>Number of patients: 21<br/>Number of deaths: 1",
+                "<strong>Lubuskie<\/strong><br/>Number of patients: 2<br/>Number of deaths: 0"
+              ],
+              null,
+              null,
+              {
+                "interactive": false,
+                "permanent": false,
+                "direction": "auto",
+                "opacity": 1,
+                "offset": [
+                  0,
+                  0
+                ],
+                "textsize": "10px",
+                "textOnly": false,
+                "className": "",
+                "sticky": true
+              },
+              null
+            ]
+          }
+        ],
+        "limits": {
+          "lat": [
+            49.8589472783918,
+            54.1547034850771
+          ],
+          "lng": [
+            15.3427455364701,
+            22.9293053026516
+          ]
+        }
+      },
+      "evals": [
+
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "leaflet-providers",
+          "version": "1.9.0",
+          "src": {
+            "href": "leaflet-providers-1.9.0"
+          },
+          "meta": null,
+          "script": "leaflet-providers_1.9.0.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "leaflet-providers-plugin",
+          "version": "2.0.3",
+          "src": {
+            "href": "leaflet-providers-plugin-2.0.3"
+          },
+          "meta": null,
+          "script": "leaflet-providers-plugin.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    }
+  },
+  "export": {
+
+  }
+}
