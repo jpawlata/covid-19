@@ -1,6 +1,5 @@
 dist: trusty   # Use Ubuntu 14.04 image 
 language: r
-sudo: false
 r: 3.6.1
 warnings_are_errors: false
 
