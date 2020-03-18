@@ -1,5 +1,5 @@
+suppressPackageStartupMessages({
 library(shiny)
-library(tidyverse)
 library(shinydashboard)
 library(rvest)
 library(jsonlite)
@@ -12,13 +12,24 @@ library(leaflet.extras)
 library(tools)
 library(gpclib)
 library(DT)
-
+library(tidyverse)
+library(testthat)
+library(shinytest)
 gpclibPermit()
+})
+
+# TEST MODE
+is_testmode <- function() {
+  isTRUE(getOption("shiny.testmode"))
+}
+
+
 
 # DATA
 covid_pl_data <- function(x){
-  url <- read_html("https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2")
   
+  url <- read_html("https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2")
+
   covid_pl_json <- url %>%
     html_node("pre") %>%
     html_text() %>%
@@ -29,7 +40,6 @@ covid_pl_data <- function(x){
     mutate(Liczba = as.numeric(Liczba)) %>%
     mutate(`Liczba zgonów` = as.numeric(`Liczba zgonów`)) %>%
     rename(Number_of_deaths=`Liczba zgonów`, 
-           County_or_City = `Powiat/Miasto`, 
            Number_of_patients = Liczba,
            Voivodeship = Województwo) %>%
     subset(select = -c(Id)) %>%
@@ -39,8 +49,11 @@ covid_pl_data <- function(x){
   covid_pl_json <- covid_pl_json[-1, ]
   }
 
-data <-covid_pl_data() %>%
-  subset(select = -c(County_or_City))
+if(isTRUE(getOption("shiny.testmode"))) {
+  data <- get(load("tests/data/covid_pl_json_data.RData"))
+} else {
+  data <- covid_pl_data()
+}
 
 data_df <- aggregate(list(Number_of_patients = data$Number_of_patients, Number_of_deaths = data$Number_of_deaths), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm=TRUE, na.action=NULL)
 
@@ -75,7 +88,8 @@ map_ll <- function(x){
 
 ##### UI
 
-ui <- dashboardPage(
+ui <- function(req){
+  dashboardPage(
   
   # Theme
   skin = "yellow",
@@ -176,16 +190,17 @@ ui <- dashboardPage(
   )
   
 )
-
+}
 
 ##### SERVER
 
 server <- function(input, output) {
-  
+
   # Reactive 
   live_data <- reactive({
-    invalidateLater(120000)    
-    covid_pl_data()                
+    invalidateLater(120000)
+    #covid_pl_data()
+    data
   })
   
   live.valueBox.sick <- reactive({
@@ -230,7 +245,7 @@ server <- function(input, output) {
   # ValueBoxes
   output$box.sick <- renderValueBox({
     valueBox(
-      "Patients:",
+      "Infected:",
       subtitle = tags$p(live.valueBox.sick(), style = "font-weight: bold; font-size: 20px;"),
       icon = icon("stethoscope"),
       color = "red"
