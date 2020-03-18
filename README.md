@@ -2,7 +2,7 @@
 
 **COVID-19: Poland** was created to store all the information about COVID-19 cases in Poland in one place and show it in a readable way.
 
-![covid-19-poland](/home/justyna/Projects/Rscripts/covid-19/img/covid-19-poland.png)
+![covid-19-poland](img/covid-19-poland.png)
 
 Live: [Covid-19:Poland](https://jpawlata.shinyapps.io/covid-19/)
 
