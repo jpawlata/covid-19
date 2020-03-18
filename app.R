@@ -216,7 +216,7 @@ server <- function(input, output) {
   # Data table
   output$table <- renderDataTable({datatable(
     live_data(),
-    colnames = c("Voivodeship", "County/City", "Number of patients", "Number of deaths")
+    colnames = c("Voivodeship", "Number of patients", "Number of deaths")
     )})
   
   # Leaflet plot
