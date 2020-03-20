@@ -13,62 +13,16 @@ library(tools)
 library(gpclib)
 library(DT)
 library(tidyverse)
+library(shiny.i18n)
 library(testthat)
 library(shinytest)
 gpclibPermit()
 })
 
-# TEST MODE
-is_testmode <- function() {
-  isTRUE(getOption("shiny.testmode"))
-}
-
-
-
-# DATA
-covid_pl_data <- function(x){
-  
-  url <- read_html("https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2")
-
-  covid_pl_json <- url %>%
-    html_node("pre") %>%
-    html_text() %>%
-    fromJSON()
-  
-  covid_pl_json <- covid_pl_json[["parsedData"]] %>%
-    fromJSON() %>%
-    mutate(Liczba = as.numeric(Liczba)) %>%
-    mutate(`Liczba zgonów` = as.numeric(`Liczba zgonów`)) %>%
-    rename(Number_of_deaths=`Liczba zgonów`, 
-           Number_of_patients = Liczba,
-           Voivodeship = Województwo) %>%
-    subset(select = -c(Id)) %>%
-    replace_na(list(Number_of_patients = 0, Number_of_deaths = 0))
-    
-  # Remove first row (info for the whole country)
-  covid_pl_json <- covid_pl_json[-1, ]
-  }
-
-if(isTRUE(getOption("shiny.testmode"))) {
-  data <- get(load("tests/data/covid_pl_json_data.RData"))
-} else {
-  data <- covid_pl_data()
-}
-
-data_df <- aggregate(list(Number_of_patients = data$Number_of_patients, Number_of_deaths = data$Number_of_deaths), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm=TRUE, na.action=NULL)
-
-covid_pl_sick <- function(x){
-  sick <- sum(as.numeric(data$Number_of_patients), na.rm = TRUE)
-}
-  
-covid_pl_death <- function(x){
-  death <- sum(as.numeric(data$Number_of_deaths), na.rm = TRUE)
-}
-
 ##### MAP
 
 # Code for map based on https://blog.prokulski.science/
-map_ll <- function(x){
+map_ll <- function(data_df){
   voiv_map = readOGR(dsn = "map/Województwa.shp", layer = "Województwa")
   
   voivodeship_names <- voiv_map@data %>% select(JPT_KOD_JE, JPT_NAZWA_)
@@ -95,7 +49,7 @@ ui <- function(req){
   skin = "yellow",
   
   # Header
-  dashboardHeader(title = "COVID-19: Poland"),
+    dashboardHeader(title = "COVID-19: Poland"),
   
   # Sidebar
   dashboardSidebar(
@@ -196,7 +150,47 @@ ui <- function(req){
 
 server <- function(input, output) {
 
-  # Reactive 
+  # Data
+  covid_pl_data <- function(){
+    
+    url <- read_html("https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2")
+    
+    covid_pl_json <- url %>%
+      html_node("pre") %>%
+      html_text() %>%
+      fromJSON()
+    
+    covid_pl_json <- covid_pl_json[["parsedData"]] %>%
+      fromJSON() %>%
+      mutate(Liczba = as.numeric(Liczba)) %>%
+      mutate(`Liczba zgonów` = as.numeric(`Liczba zgonów`)) %>%
+      rename(Number_of_deaths=`Liczba zgonów`, 
+             Number_of_patients = Liczba,
+             Voivodeship = Województwo) %>%
+      subset(select = -c(Id)) %>%
+      replace_na(list(Number_of_patients = 0, Number_of_deaths = 0))
+    
+    # Remove first row (info for the whole country)
+    covid_pl_json <- covid_pl_json[-1, ]
+  }
+  
+  if(isTRUE(getOption("shiny.testmode"))) {
+    data <- get(load("tests/data/covid_pl_json_data.RData"))
+  } else {
+    data <- covid_pl_data()
+  }
+  
+  data_df <- aggregate(list(Number_of_patients = data$Number_of_patients, Number_of_deaths = data$Number_of_deaths), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm=TRUE, na.action=NULL)
+  
+  covid_pl_sick <- function(x){
+    sick <- sum(as.numeric(data$Number_of_patients), na.rm = TRUE)
+  }
+  
+  covid_pl_death <- function(x){
+    death <- sum(as.numeric(data$Number_of_deaths), na.rm = TRUE)
+  }
+  
+  # Reactive
   live_data <- reactive({
     invalidateLater(120000)
     #covid_pl_data()
@@ -221,14 +215,15 @@ server <- function(input, output) {
   
   # Leaflet plot
   output$map <- renderLeaflet({
-    data <- map_ll()
+    data <- map_ll(data_df)
     leaflet(data) %>%
       setView(lng = 19.145136, lat = 51.919438, zoom = 6) %>%
       addProviderTiles("CartoDB.Positron", options = providerTileOptions(noWrap = TRUE)) %>%
       addCircleMarkers(
         lng=~long, 
         lat=~lat,
-        radius=~Number_of_patients, 
+        #radius=~Number_of_patients, 
+        radius =~ (Number_of_patients/covid_pl_sick())*100,
         fillColor= "orange",
         color = "#CC5500",
         stroke=TRUE, 
