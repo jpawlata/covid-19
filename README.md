@@ -26,6 +26,11 @@ Have a question? Contact me via Twitter [@justynapawlata](https://twitter.com/ju
 
 ## Changelog
 
+#### 2.0.0  - 2020/03/18
+
+- recovery box
+- charts
+
 #### 1.0.1  - 2020/03/18
 
 - tests (shinytest) with Travis CI
