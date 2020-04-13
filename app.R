@@ -322,7 +322,7 @@ server <- function(input, output) {
     data_all %>%
       plot_ly(x = ~Date, y = ~Infected_per_Day, type = "scatter", mode = "lines",
               color = I('orange'), name = "Infected per Day") %>%
-      layout(title = "Number of people Infectef per day",
+      layout(title = "Number of people Infected per day",
              xaxis = list(title = 'Date'),
              yaxis = list(title = "Infected")
       )
