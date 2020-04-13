@@ -12,12 +12,19 @@ library(leaflet.extras)
 library(tools)
 library(gpclib)
 library(DT)
+library(plotly)
 library(tidyverse)
-#library(shiny.i18n)
+# library(shiny.i18n)
 library(testthat)
 library(shinytest)
 gpclibPermit()
 })
+
+##### TRANSLATIONS
+
+#translator <- Translator$new(translation_csvs_path = "../data")
+
+
 
 ##### MAP
 
@@ -57,6 +64,7 @@ ui <- function(req){
     # Tabs
     sidebarMenu(
       menuItem("Map", tabName = "map", icon = icon("map-marked-alt")),
+      menuItem("Charts", tabName = "charts", icon = icon("chart-bar"), badgeLabel = "New", badgeColor = "green"),
       menuItem("Data", tabName = "data", icon = icon("table")),
       menuItem("FAQ", tabName = "faq", icon = icon("info")),
       menuItem("Author", tabName = "author", icon = icon("user"))
@@ -92,12 +100,15 @@ ui <- function(req){
     tabItems(
       tabItem(tabName = "map",
               fluidRow(
-                # valueBox
+                # valueBox sick
                 valueBoxOutput("box.sick",
-                              width = 6),
-                # valueBox
+                              width = 4),
+                # valueBox death
                 valueBoxOutput("box.death",
-                              width = 6)
+                              width = 4),
+                # valueBox recovered
+                valueBoxOutput("box.recovered",
+                               width = 4)
               ),
               fluidRow(
                   leafletOutput("map"),
@@ -105,7 +116,21 @@ ui <- function(req){
                   height = "700px"
               )
     ),
-    tabItem(tabName = "data",
+    
+      tabItem(tabName = "charts",
+            h2("Charts"),
+            #div(style = "padding: 0px 15px; font-family: Verdana,Arial,sans-serif;", remove div
+                fluidRow(
+                  #Plots
+                  br(),
+                  plotlyOutput("chart.sick_per_day", height = "350px"),
+                  br(),
+                  plotlyOutput("chart.death_per_day", height = "350px")
+                )
+            #) remove div
+    ),
+    
+      tabItem(tabName = "data",
             h2("Data Table"),
             div(style = "padding: 0px 15px; font-family: Verdana,Arial,sans-serif;",
             fluidRow(
@@ -124,15 +149,10 @@ ui <- function(req){
             h3("1. What's the purpose of this website?"),
             p(HTML("<strong>COVID-19: Poland</strong>"), " was created to store all the information about COVID-19 cases in Poland in one place and show it in a readable way."),
             h3("2. What's the data source?"),
-            p("Data about the COVID-19 disease in Poland: ", a("Website of the Republic of Poland", href="https://www.gov.pl/web/coronavirus", target="_blank"), br(),
+            p("Data about the COVID-19 disease in Poland: ", a("Website of the Republic of Poland", href="https://www.gov.pl/web/coronavirus", target="_blank"), " & ", a("Michał Rogalski", href="https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#", target="_blank"), br(),
               "Data used to show disease on the map: ", a("Główny Urząd Geodezji i Kartografii", href="http://www.gugik.gov.pl/", target="_blank")),
             h3("3. How often will the page be updated?"),
             p(HTML("<strong>Covid-19: Poland</strong>"), " is updated automatically once the numbers on ", a("Website of the Republic of Poland", href="https://www.gov.pl/web/coronavirus", target="_blank"), " are changed."),
-            br(),br(),br(),
-            h3("Change log:"),
-            tags$ul(
-              tags$li(HTML("<strong>1.0.0 - 2020/03/16</strong>"), br(), "First Release",)
-              ),
             ),
     tabItem(tabName = "author",
             h2("Author"),
@@ -150,8 +170,8 @@ ui <- function(req){
 
 server <- function(input, output) {
 
-  # Data
-  covid_pl_data <- function(){
+  ### Data per Voivodeship 
+  covid_pl_voiv <- function(){
     
     url <- read_html("https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2")
     
@@ -174,10 +194,55 @@ server <- function(input, output) {
     covid_pl_json <- covid_pl_json[-1, ]
   }
   
+  ### Detailed data for Poland
+  
+  covid_pl_all <- function(){
+    
+    ### Get the data:
+    url <- "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#"
+    
+    covid_pl <- read_html(url) %>%
+      html_nodes("table.waffle") %>%
+      .[[1]] %>%
+      html_table(fill = TRUE)
+    
+    ### Clean the data:
+    covid_pl_2 <- covid_pl[, -1] %>% #remove first column
+      select(A, B, C, E, F)  %>% # remove unnecessary/empty columns 
+      mutate_if(is.character, list(~na_if(.,""))) %>% #remove rows with no data
+      na.omit() #remve rows with no data
+    
+    # First row as a colnames
+    covid_pl_temp <- covid_pl_2[-1,]
+    colnames(covid_pl_temp) <- covid_pl_2[1,]
+    
+    # Colnames:
+    covid_pl_temp <- covid_pl_temp %>%
+      rename(Date = Data,
+             Infected_per_Day = `Próbki pozytywne`,
+             Negative_2nd_Test = `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane*`,
+             Deaths_per_Day = Zgony,
+             Recovered_per_Day = Zdrowi
+      ) %>%
+      # Add a year to the date, convert column into date
+      mutate(Date = paste(Date, ".2020", sep="")) %>%
+      mutate(Date = as.Date(Date, "%d.%m.%Y")) %>%
+      # Remove + / - / whitespace
+      mutate_at(vars(-Date), funs(gsub("\\+", "", .))) %>%
+      mutate_at(vars(-Date), funs(gsub("\\-", "", .))) %>%
+      mutate_at(vars(-Date), funs(gsub("\\%", "", .))) %>%
+      mutate_at(vars(-Date), funs(as.numeric(gsub(" ", "", .))))
+    
+    covid_pl_final <- covid_pl_temp
+    }
+  
+  ### TO UPDATE TESTS
   if(isTRUE(getOption("shiny.testmode"))) {
     data <- get(load("tests/data/covid_pl_json_data.RData"))
+    data_pl <- get(load("tests/data/covid_pl_all_data.RData"))
   } else {
-    data <- covid_pl_data()
+    data <- covid_pl_voiv()
+    data_pl <- covid_pl_all()
   }
   
   data_df <- aggregate(list(Number_of_patients = data$Number_of_patients, Number_of_deaths = data$Number_of_deaths), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm=TRUE, na.action=NULL)
@@ -190,11 +255,20 @@ server <- function(input, output) {
     death <- sum(as.numeric(data$Number_of_deaths), na.rm = TRUE)
   }
   
+  covid_pl_recovered <- function(x){
+    recovered <- sum(as.numeric(data_pl$Recovered_per_Day), na.rm = TRUE)
+  }
+  
   # Reactive
-  live_data <- reactive({
+  live_data_voiv <- reactive({
     invalidateLater(120000)
-    #covid_pl_data()
+    #covid_pl_voiv()
     data
+  })
+  
+  live_data_pl_all <- reactive({
+    invalidateLater(120000)
+    data_pl
   })
   
   live.valueBox.sick <- reactive({
@@ -207,9 +281,14 @@ server <- function(input, output) {
     covid_pl_death()       
   })
   
+  live.valueBox.recovered <- reactive({
+    invalidateLater(120000)   
+    covid_pl_recovered()       
+  })
+  
   # Data table
   output$table <- renderDataTable({datatable(
-    live_data(),
+    live_data_voiv(),
     colnames = c("Voivodeship", "Number of patients", "Number of deaths")
     )})
   
@@ -237,7 +316,31 @@ server <- function(input, output) {
       )
   })
   
-  # ValueBoxes
+  output$chart.sick_per_day <- renderPlotly({
+    data_all <- live_data_pl_all()
+    
+    data_all %>%
+      plot_ly(x = ~Date, y = ~Infected_per_Day, type = "scatter", mode = "lines",
+              color = I('orange'), name = "Infected per Day") %>%
+      layout(title = "Number of people Infectef per day",
+             xaxis = list(title = 'Date'),
+             yaxis = list(title = "Infected")
+      )
+  })
+  
+  output$chart.death_per_day <- renderPlotly({
+    data_all <- live_data_pl_all()
+    
+    data_all %>%
+      plot_ly(x = ~Date, y = ~Deaths_per_Day, type = "scatter", mode = "lines",
+              color = I('red'), name = "Deaths") %>%
+      layout(title = "Deaths per day",
+             xaxis = list(title = 'Date'),
+             yaxis = list(title = "Deaths")
+      )
+  })
+  
+  # ValueBox Sick
   output$box.sick <- renderValueBox({
     valueBox(
       "Infected:",
@@ -247,7 +350,7 @@ server <- function(input, output) {
     )
   })
   
-  # ValueBoxes
+  # ValueBox Deaths
   output$box.death <- renderValueBox({
     valueBox(
       "Total deaths:",
@@ -257,7 +360,18 @@ server <- function(input, output) {
     )
   })
   
+  # ValueBox Recovered
+  output$box.recovered <- renderValueBox({
+    valueBox(
+      "Recovered:",
+      subtitle = tags$p(live.valueBox.recovered(), style = "font-weight: bold; font-size: 20px;"),
+      icon = icon("heartbeat"),
+      color = "green"
+    )
+  })
 }
 
 ##### RUN APP
+options(shiny.trace=FALSE)
+options(shiny.fullstacktrace=FALSE)
 shinyApp(ui = ui, server = server)
