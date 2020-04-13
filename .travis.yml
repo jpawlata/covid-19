@@ -8,6 +8,12 @@ install:
   - R -e 'if (system.file(package="packrat") == "") install.packages("packrat")'
   - R -e "packrat::packify(); packrat::restore()"
 
+r_packages:
+  - covr
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
+
 addons:
   apt:
     packages:
