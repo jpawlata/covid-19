@@ -7,7 +7,7 @@ warnings_are_errors: false
 install:
   - R -e 'if (system.file(package="packrat") == "") install.packages("packrat")'
   - R -e "packrat::packify(); packrat::restore()"
-  - Rscript -e 'install.packages("packrat")'
+  - Rscript -e 'install.packages("covr")'
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
