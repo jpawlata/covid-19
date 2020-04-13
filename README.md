@@ -8,7 +8,7 @@ Live: [Covid-19:Poland](https://jpawlata.shinyapps.io/covid-19/)
 
 ## Data Source
 
-Data about the COVID-19 disease in Poland: [Website of the Republic of Poland](https://www.gov.pl/web/coronavirus)
+Data about the COVID-19 disease in Poland: [Website of the Republic of Poland](https://www.gov.pl/web/coronavirus) & [Michał Rogalski](https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#)
 
 Data used to show disease on the map: [Główny Urząd Geodezji i Kartografii](http://www.gugik.gov.pl/)
 
@@ -23,6 +23,7 @@ Have a question? Contact me via Twitter [@justynapawlata](https://twitter.com/ju
 - [Shiny](https://shiny.rstudio.com/)
 - [RStudio](https://rstudio.com/)
 - [shinytest](https://rstudio.github.io/shinytest/)
+- [plotly](https://plotly.com/)
 
 ## Changelog
 
@@ -37,7 +38,7 @@ Have a question? Contact me via Twitter [@justynapawlata](https://twitter.com/ju
 
 #### 1.0.0  - 2020/03/16
 
-First release
+- First release
 
 ## License
 
