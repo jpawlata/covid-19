@@ -1,4 +1,4 @@
-# COVID-19: Poland [![Build Status](https://travis-ci.com/jpawlata/covid-19.svg?branch=master)](https://travis-ci.com/jpawlata/covid-19)![Version](https://img.shields.io/badge/version-2.0-blue)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# COVID-19: Poland [![Build Status](https://travis-ci.com/jpawlata/covid-19.svg?branch=master)](https://travis-ci.com/jpawlata/covid-19)   ![Version](https://img.shields.io/badge/version-2.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **COVID-19: Poland** was created to store all the information about COVID-19 cases in Poland in one place and show it in a readable way.
 
@@ -24,8 +24,14 @@ Have a question? Contact me via Twitter [@justynapawlata](https://twitter.com/ju
 - [RStudio](https://rstudio.com/)
 - [shinytest](https://rstudio.github.io/shinytest/)
 - [plotly](https://plotly.com/)
+- [googlesheets4](https://googlesheets4.tidyverse.org/index.html)
 
 ## Changelog
+
+#### 2.1.0  - 2020/05/08
+
+- read-in data using googlesheets4
+- charts as a main tab
 
 #### 2.0.0  - 2020/04/13
 

@@ -179,7 +179,12 @@ Package: fs
 Source: CRAN
 Version: 1.3.2
 Hash: 3b9b43955466e315b70210c1772822f1
-Requires: Rcpp
+
+Package: gargle
+Source: CRAN
+Version: 0.5.0
+Hash: 44acad9ecb39b560e1d077c3fe6969f3
+Requires: glue, jsonlite, rlang, withr, fs, httr
 
 Package: generics
 Source: CRAN
@@ -196,6 +201,29 @@ Package: glue
 Source: CRAN
 Version: 1.3.2
 Hash: fb50a5bde4eab383b1307003bbac25dd
+
+Package: googledrive
+Source: CRAN
+Version: 1.0.1
+Hash: c9bcab023652c5c94c472759a3ff177b
+Requires: curl, glue, jsonlite, magrittr, rlang, purrr, httr, tibble,
+    gargle, uuid
+
+Package: googlesheets4
+Source: github
+Version: 0.1.1.9100
+Hash: 83f5fbea408ff7bf69ed978a3797edba
+Requires: curl, glue, magrittr, rlang, lifecycle, purrr, vctrs, httr,
+    tibble, cellranger, rematch2, gargle, googledrive, ids
+GithubRepo: googlesheets4
+GithubUsername: tidyverse
+GithubRef: master
+GithubSha1: 0713d439366146fdc51da1010710bd7541e6c0b3
+RemoteHost: api.github.com
+RemoteRepo: googlesheets4
+RemoteUsername: tidyverse
+RemoteRef: master
+RemoteSha: 0713d439366146fdc51da1010710bd7541e6c0b3
 
 Package: gpclib
 Source: CRAN
@@ -258,6 +286,12 @@ Source: CRAN
 Version: 1.4.1
 Hash: cc16de93eaabd3c6d0785cb8e6d059ab
 Requires: R6, curl, jsonlite, mime, openssl
+
+Package: ids
+Source: CRAN
+Version: 1.0.1
+Hash: 5fe64020c5c5c86b8de249397dba4ebb
+Requires: openssl, uuid
 
 Package: isoband
 Source: CRAN
@@ -424,10 +458,10 @@ Package: plotly
 Source: CRAN
 Version: 4.9.2.1
 Hash: eeb9c83733cd3c9852c727b48678ce9a
-Requires: RColorBrewer, base64enc, digest, jsonlite, lazyeval,
-    magrittr, rlang, viridisLite, htmltools, purrr, crosstalk,
-    htmlwidgets, promises, scales, httr, tibble, dplyr, tidyr, ggplot2,
-    data.table, hexbin
+Requires: RColorBrewer, base64enc, data.table, digest, hexbin,
+    jsonlite, lazyeval, magrittr, rlang, viridisLite, htmltools, purrr,
+    crosstalk, htmlwidgets, promises, scales, httr, tibble, dplyr,
+    tidyr, ggplot2
 
 Package: plyr
 Source: CRAN
@@ -673,6 +707,11 @@ Package: utf8
 Source: CRAN
 Version: 1.1.4
 Hash: f3f97ce59092abc8ed3fd098a59e236c
+
+Package: uuid
+Source: CRAN
+Version: 0.1-4
+Hash: b0fcab4d6aa43d97cf09e336b65b906f
 
 Package: vctrs
 Source: CRAN
