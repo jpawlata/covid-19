@@ -222,13 +222,13 @@ server <- function(input, output) {
     data <- read_sheet(url, sheet = "Wzrost")
     
     covid_pl_temp <- data %>%
-      select(c(Data, `Próbki pozytywne`, `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane*`, Zgony, Zdrowi)) %>%
+      select(c(Data, `Nowe przypadki`, `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane, osoby błędnie zaraportowane`, `Nowe zgony`, `Nowe wyzdrowienia`)) %>%
       na.omit() %>% # remve rows with no data
       rename(Date = Data,
-             Infected_per_Day = `Próbki pozytywne`,
-             Negative_2nd_Test = `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane*`,
-             Deaths_per_Day = Zgony,
-             Recovered_per_Day = Zdrowi) %>%
+             Infected_per_Day = `Nowe przypadki`,
+             Negative_2nd_Test = `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane, osoby błędnie zaraportowane`,
+             Deaths_per_Day = `Nowe zgony`,
+             Recovered_per_Day = `Nowe wyzdrowienia`) %>%
       mutate(Date = as.Date(Date, "%Y.%m.%d"))
     
     #covid_pl <- read_html(url) %>%
