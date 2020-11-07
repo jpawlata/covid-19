@@ -8,6 +8,7 @@ install:
   - R -e 'if (system.file(package="packrat") == "") install.packages("packrat")'
   - R -e "packrat::packify(); packrat::restore()"
   - Rscript -e 'install.packages("covr")'
+  - Rscript -e 'install.packages("quantmod")'
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
