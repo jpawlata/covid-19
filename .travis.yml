@@ -1,4 +1,4 @@
-dist: trusty   # Use Ubuntu 14.04 image 
+dist: xenial # Trusty no longer supported
 language: r
 r: 3.6.1
 warnings_are_errors: false
@@ -23,7 +23,7 @@ cache:
   # Main R library
   packages: true
   directories:
-    # Packrat packages
+    # Packrat packages    
     - packrat/lib
     # PhantomJS
     - travis_phantomjs
