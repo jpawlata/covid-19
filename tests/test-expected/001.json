@@ -1,7 +1,7 @@
 {
   "output": {
     "box.sick": {
-      "html": "<div class=\"small-box bg-red\">\n  <div class=\"inner\">\n    <h3>Infected:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">6674<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-stethoscope\"><\/i>\n  <\/div>\n<\/div>",
+      "html": "<div class=\"small-box bg-red\">\n  <div class=\"inner\">\n    <h3>Active cases:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">342565<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-stethoscope\"><\/i>\n  <\/div>\n<\/div>",
       "deps": [
         {
           "name": "font-awesome",

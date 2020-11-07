@@ -1,15 +1,15 @@
-# COVID-19: Poland [![Build Status](https://travis-ci.com/jpawlata/covid-19.svg?branch=master)](https://travis-ci.com/jpawlata/covid-19)   ![Version](https://img.shields.io/badge/version-2.1-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# COVID-19: Poland [![Build Status](https://travis-ci.com/jpawlata/covid-19.svg?branch=master)](https://travis-ci.com/jpawlata/covid-19)   ![Version](https://img.shields.io/badge/version-2.2-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **COVID-19: Poland** was created to store all the information about COVID-19 cases in Poland in one place and show it in a readable way.
 
-![covid-19-poland](img/covid-19-poland.png)
+![covid-19-poland](img/COVID-19_Poland.jpg)
 
 Live: [Covid-19:Poland](https://jpawlata.shinyapps.io/covid-19/)
 
 ## Data Source
 
-COVID-19 disease in Poland: [Website of the Republic of Poland](https://www.gov.pl/web/coronavirus) & [Michał Rogalski](https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#)
-
+COVID-19 disease in Poland: [Michał Rogalski](https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#)
+      
 Data used to show disease on the map: [Główny Urząd Geodezji i Kartografii](http://www.gugik.gov.pl/)
 
 ## Contact
@@ -28,7 +28,12 @@ Have a question? Contact me via Twitter [@justynapawlata](https://twitter.com/ju
 
 ## Changelog
 
-  #### 2.1.0  - 2020/05/08
+#### 2.2.0  - 2020/11/07
+
+- only one source of covid-19 data
+- new & updated charts
+
+#### 2.1.0  - 2020/05/08
 
 - read-in data using googlesheets4
 - charts as a main tab

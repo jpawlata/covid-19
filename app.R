@@ -13,11 +13,13 @@ suppressPackageStartupMessages({
   library(gpclib)
   library(DT)
   library(plotly)
+  library(quantmod)
   library(tidyverse)
   # library(shiny.i18n)
   library(testthat)
   library(shinytest)
   library(googlesheets4)
+  library(janitor)
   gpclibPermit()
 })
 
@@ -31,6 +33,9 @@ suppressPackageStartupMessages({
 
 # Code for map based on https://blog.prokulski.science/
 map_ll <- function(data_df) {
+  
+  data_df$Voivodeship <- tolower(data_df$Voivodeship)
+  
   voiv_map <- readOGR(dsn = "map/Województwa.shp", layer = "Województwa")
 
   voivodeship_names <- voiv_map@data %>% select(JPT_KOD_JE, JPT_NAZWA_)
@@ -42,9 +47,9 @@ map_ll <- function(data_df) {
     set_names(c("long", "lat")) %>%
     mutate(nazwa = voiv_map@data$JPT_NAZWA_) %>%
     select(nazwa, long, lat)
-
+  
   centroids_df <- left_join(centroids, data_df, by = c("nazwa" = "Voivodeship")) %>%
-    replace_na(list(Number_of_patients = 0, Number_of_deaths = 0))
+    replace_na(list(Active_cases = 0, Deaths = 0))
 }
 
 
@@ -65,7 +70,7 @@ ui <- function(req) {
 
       # Tabs
       sidebarMenu(
-        menuItem("Charts", tabName = "charts", icon = icon("chart-bar"), badgeLabel = "New", badgeColor = "green"),
+        menuItem("Charts", tabName = "charts", icon = icon("chart-bar"), badgeLabel = "New!", badgeColor = "green"),
         menuItem("Map", tabName = "map", icon = icon("map-marked-alt")),
         menuItem("Data", tabName = "data", icon = icon("table")),
         menuItem("FAQ", tabName = "faq", icon = icon("info")),
@@ -132,9 +137,11 @@ ui <- function(req) {
           fluidRow(
             # Plots
             br(),
-            plotlyOutput("chart.sick_per_day", height = "350px"),
+            plotlyOutput("chart.sick_per_day", height = "550px"),
             br(),
-            plotlyOutput("chart.death_per_day", height = "350px")
+            plotlyOutput("chart.death_per_day", height = "550px"),
+            br(),
+            plotlyOutput("chart.active_cases_by_voiv", height = "550px")
             )
           ) 
         ),
@@ -162,11 +169,11 @@ ui <- function(req) {
           p(HTML("<strong>COVID-19: Poland</strong>"), " was created to store all the information about COVID-19 cases in Poland in one place and show it in a readable way."),
           h3("2. What's the data source?"),
           p(
-            "Data about the COVID-19 disease in Poland: ", a("Website of the Republic of Poland", href = "https://www.gov.pl/web/coronavirus", target = "_blank"), " & ", a("Michał Rogalski", href = "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#", target = "_blank"), br(),
+            "Data about the COVID-19 disease in Poland: ", a("Michał Rogalski", href = "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#", target = "_blank"), br(),
             "Data used to show disease on the map: ", a("Główny Urząd Geodezji i Kartografii", href = "http://www.gugik.gov.pl/", target = "_blank")
           ),
           h3("3. How often will the page be updated?"),
-          p(HTML("<strong>Covid-19: Poland</strong>"), " is updated automatically once the numbers on ", a("Website of the Republic of Poland", href = "https://www.gov.pl/web/coronavirus", target = "_blank"), " are changed."),
+          p(HTML("<strong>Covid-19: Poland</strong>"), " is updated automatically once the numbers on ", a("Michał Rogalski's page", href = "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#", target = "_blank"), " are changed."),
         ),
         tabItem(
           tabName = "author",
@@ -185,28 +192,25 @@ server <- function(input, output) {
 
   ### Data per Voivodeship
   covid_pl_voiv <- function() {
-    url <- read_html("https://www.gov.pl/web/koronawirus/wykaz-zarazen-koronawirusem-sars-cov-2")
-
-    covid_pl_json <- url %>%
-      html_node("pre") %>%
-      html_text() %>%
-      fromJSON()
-
-    covid_pl_json <- covid_pl_json[["parsedData"]] %>%
-      fromJSON() %>%
-      mutate_at(vars(-Id), funs(gsub('\\s+', '', .))) %>% #remove whitespace
-      mutate(Liczba = as.numeric(Liczba)) %>%
-      mutate(`Liczba zgonów` = as.numeric(`Liczba zgonów`)) %>%
-      rename(
-        Number_of_deaths = `Liczba zgonów`,
-        Number_of_patients = Liczba,
-        Voivodeship = Województwo
+    
+    gs4_deauth() # googlesheets4 in de-authorized state
+    url <- "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/edit#gid=1400401584"
+    
+    data_voiv <- read_sheet(url, sheet = "Aktualna sytuacja w Polsce")
+    
+    covid_voiv_temp <- data_voiv %>%
+      select(c(`Województwo`, `Suma potwierdzonych przypadków`, `Zgony*`, `Wyzdrowienia *`, `Nieaktywne przypadki`, `Aktywne przypadki*`)) %>%
+      na.omit() %>%
+      rename(Voivodeship = `Województwo`, 
+             Confirmed_cases = `Suma potwierdzonych przypadków`, 
+             Deaths = `Zgony*`, 
+             Recovered = `Wyzdrowienia *`, 
+             NonActive_cases = `Nieaktywne przypadki`, 
+             Active_cases = `Aktywne przypadki*`
       ) %>%
-      subset(select = -c(Id)) %>%
-      replace_na(list(Number_of_patients = 0, Number_of_deaths = 0))
-
-    # Remove first row (info for the whole country)
-    covid_pl_json <- covid_pl_json[-1, ]
+      filter(Voivodeship != 'POLSKA')
+    
+    covid_voiv_final <- covid_voiv_temp
   }
 
   ### Detailed data for Poland
@@ -216,11 +220,11 @@ server <- function(input, output) {
     gs4_deauth() # googlesheets4 in de-authorized state
     
     ### Get the data:
-    #url <- "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/htmlview?usp=sharing#"
     url <- "https://docs.google.com/spreadsheets/d/1ierEhD6gcq51HAm433knjnVwey4ZE5DCnu1bW7PRG3E/edit#gid=1400401584"
 
     data <- read_sheet(url, sheet = "Wzrost")
-    
+    #data_voiv <- read_sheet(url, sheet = "Aktualna sytuacja w Polsce")
+  
     covid_pl_temp <- data %>%
       select(c(Data, `Nowe przypadki`, `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane, osoby błędnie zaraportowane`, `Nowe zgony`, `Nowe wyzdrowienia`)) %>%
       na.omit() %>% # remve rows with no data
@@ -230,64 +234,32 @@ server <- function(input, output) {
              Deaths_per_Day = `Nowe zgony`,
              Recovered_per_Day = `Nowe wyzdrowienia`) %>%
       mutate(Date = as.Date(Date, "%Y.%m.%d"))
-    
-    #covid_pl <- read_html(url) %>%
-    #  html_nodes("table.waffle") %>%
-    #  .[[1]] %>%
-    #  html_table(fill = TRUE)
-
-    ### Clean the data:
-    #covid_pl_2 <- covid_pl[, -1] %>% # remove first column
-    #  select(A, B, C, E, F) %>% # remove unnecessary/empty columns
-    #  mutate_if(is.character, list(~ na_if(., ""))) %>% # remove rows with no data
-    #  na.omit() # remve rows with no data
-
-    # First row as a colnames
-    #covid_pl_temp <- covid_pl_2[-1, ]
-    #colnames(covid_pl_temp) <- covid_pl_2[1, ]
-
-    # Colnames:
-    #covid_pl_temp <- covid_pl_temp %>%
-    #  rename(
-    #    Date = Data,
-    #    Infected_per_Day = `Próbki pozytywne`,
-    #    Negative_2nd_Test = `Osoby z wynikiem neg. przy ponownym tescie, osoby zdublowane*`,
-    #    Deaths_per_Day = Zgony,
-    #    Recovered_per_Day = Zdrowi
-    #  ) %>%
-      # Add a year to the date, convert column into date
-    #  mutate(Date = paste(Date, ".2020", sep = "")) %>%
-    #  mutate(Date = as.Date(Date, "%d.%m.%Y")) %>%
-    #  # Remove + / - / whitespace
-    #  mutate_at(vars(-Date), funs(gsub("\\+", "", .))) %>%
-    #  mutate_at(vars(-Date), funs(gsub("\\-", "", .))) %>%
-    #  mutate_at(vars(-Date), funs(gsub("\\%", "", .))) %>%
-    #  mutate_at(vars(-Date), funs(as.numeric(gsub(" ", "", .))))
 
     covid_pl_final <- covid_pl_temp
+    #covid_voiv_final <- covid_voiv_temp
   }
 
   ### TO UPDATE TESTS
   if (isTRUE(getOption("shiny.testmode"))) {
-    data <- get(load("tests/data/covid_pl_json_data.RData"))
-    data_pl <- get(load("tests/data/covid_pl_all_data.RData"))
+    data <- get(load("tests/data/data_voiv.RData"))
+    data_pl <- get(load("tests/data/data_pl.RData"))
   } else {
     data <- covid_pl_voiv()
     data_pl <- covid_pl_all()
   }
 
-  data_df <- aggregate(list(Number_of_patients = data$Number_of_patients, Number_of_deaths = data$Number_of_deaths), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm = TRUE, na.action = NULL)
+  data_df <- aggregate(list(Deaths = data$Deaths, Active_cases = data$Active_cases), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm = TRUE, na.action = NULL)
 
   covid_pl_sick <- function(x) {
-    sick <- sum(as.numeric(data$Number_of_patients), na.rm = TRUE)
+    sick <- sum(as.numeric(data$Active_cases), na.rm = TRUE)
   }
 
   covid_pl_death <- function(x) {
-    death <- sum(as.numeric(data$Number_of_deaths), na.rm = TRUE)
+    death <- sum(as.numeric(data$Deaths), na.rm = TRUE)
   }
 
   covid_pl_recovered <- function(x) {
-    recovered <- sum(as.numeric(data_pl$Recovered_per_Day), na.rm = TRUE)
+    recovered <- sum(as.numeric(data$Recovered), na.rm = TRUE)
   }
 
   # Reactive
@@ -321,30 +293,33 @@ server <- function(input, output) {
   output$table <- renderDataTable({
     datatable(
       live_data_voiv(),
-      colnames = c("Voivodeship", "Number of patients", "Number of deaths")
+      colnames = c("No.", "Voivodeship", "Confirmed cases", "Deaths", "Recovered", "Non Active cases", "Active cases")
     )
   })
-
+  
+  
   # Leaflet plot
   output$map <- renderLeaflet({
     data <- map_ll(data_df)
+    
+    percent = (data$Active_cases/covid_pl_sick()) * 100
+    
     leaflet(data) %>%
       setView(lng = 19.145136, lat = 51.919438, zoom = 6) %>%
       addProviderTiles("CartoDB.Positron", options = providerTileOptions(noWrap = TRUE)) %>%
       addCircleMarkers(
         lng = ~long,
         lat = ~lat,
-        # radius=~Number_of_patients,
-        radius = ~ (Number_of_patients / covid_pl_sick()) * 100,
+        radius = ~ percent,
         fillColor = "orange",
         color = "#CC5500",
         stroke = TRUE,
         fillOpacity = 0.5,
         # Popup
         popup = ~ paste0(
-          "<strong>", toTitleCase(nazwa), "</strong>", br(),
-          "Number of patients: ", as.character(Number_of_patients), br(),
-          "Number of deaths: ", as.character(Number_of_deaths)
+          "<strong>", toTitleCase(nazwa), "</strong>", " (", round(percent, 2), " %)", br(),
+          "Active cases: ", as.character(Active_cases), br(),
+          "Number of deaths: ", as.character(Deaths)
         )
       )
   })
@@ -353,13 +328,28 @@ server <- function(input, output) {
     data_all <- live_data_pl_all()
     
     data_all %>%
-      plot_ly(
-        x = ~Date, y = ~Infected_per_Day, type = "scatter", mode = "lines",
-        color = I("orange"), name = "Infected per Day"
-      ) %>%
+      plot_ly(x = ~Date, y = ~Infected_per_Day, type = "scatter", mode = "lines+markers", color = I("orange"), name = "Infected per Day", fill = "tozeroy") %>%
       layout(
         title = sprintf("<b>Number of people infected per day</b>"),
-        xaxis = list(title = sprintf("<b>Date</b>")),
+        xaxis = list(title = sprintf("<b>Date</b>"),
+                     range = c(Sys.Date() - 90, Sys.Date()),
+                     rangeselector = list(
+                       buttons = list(
+                         list(
+                           count = 14, label = "2 wk", step = "day", stepmode = "backward"),
+                         list(
+                           count = 1, label = "1 mo", step = "month", stepmode = "backward"),
+                         list(
+                           count = 3, label = "3 mo", step = "month", stepmode = "backward"),
+                         list(
+                           count = 6, label = "6 mo", step = "month", stepmode = "backward"),
+                         list(
+                           count = 1, label = "1 yr", step = "year", stepmode = "backward"),
+                         list(
+                           count = 1, label = "YTD", step = "year", stepmode = "todate"),
+                         list(step = "all"))),
+                     rangeslider = list(type = "date")
+                             ),
         yaxis = list(title = sprintf("\n<b>Infected</b>\n\n")),
         margin = list(l = 50, r = 0, b = 50, t = 70)
       )
@@ -367,24 +357,56 @@ server <- function(input, output) {
 
   output$chart.death_per_day <- renderPlotly({
     data_all <- live_data_pl_all()
-
+    
     data_all %>%
-      plot_ly(
-        x = ~Date, y = ~Deaths_per_Day, type = "scatter", mode = "lines",
-        color = I("red"), name = "Deaths"
-      ) %>%
+      plot_ly(x = ~Date, y = ~Deaths_per_Day, type = "scatter", mode = "lines+markers", color = I("red"), name = "Deaths per Day", fill = "tozeroy") %>%
       layout(
         title = sprintf("<b>Deaths per day</b>"),
-        xaxis = list(title = sprintf("<b>Date</b>")),
+        xaxis = list(title = sprintf("<b>Date</b>"),
+                     range = c(Sys.Date() - 90, Sys.Date()),
+                     rangeselector = list(
+                       buttons = list(
+                         list(
+                           count = 14, label = "2 wk", step = "day", stepmode = "backward"),
+                         list(
+                           count = 1, label = "1 mo", step = "month", stepmode = "backward"),
+                         list(
+                           count = 3, label = "3 mo", step = "month", stepmode = "backward"),
+                         list(
+                           count = 6, label = "6 mo", step = "month", stepmode = "backward"),
+                         list(
+                           count = 1, label = "1 yr", step = "year", stepmode = "backward"),
+                         list(
+                           count = 1, label = "YTD", step = "year", stepmode = "todate"),
+                         list(step = "all"))),
+                     rangeslider = list(type = "date")
+                     ),
         yaxis = list(title = sprintf("\n<b>Deaths</b>\n")),
         margin = list(l = 50, r = 0, b = 50, t = 70)
       )
   })
 
+  output$chart.active_cases_by_voiv <- renderPlotly({
+    data_all <- live_data_voiv()
+    
+    data_all$Voivodeship <- factor(data_all$Voivodeship, levels = unique(data_all$Voivodeship)[order(data_all$Active_cases, decreasing = TRUE)])
+    
+    data_all %>%
+      plot_ly(x = ~Voivodeship, y = ~Active_cases, type = "bar") %>%
+      layout(
+        title = sprintf("<b>Active cases by Voivodeship</b>"),
+        xaxis = list(title = sprintf("\n<b>Voivodeship</b>\n")),
+        yaxis = list(title = sprintf("\n<b>Active cases</b>\n")),
+        margin = list(l = 50, r = 0, b = 50, t = 70)
+      )
+  })
+  
+  
+  
   # ValueBox Sick
   output$box.sick <- renderValueBox({
     valueBox(
-      "Infected:",
+      "Active cases:",
       subtitle = tags$p(live.valueBox.sick(), style = "font-weight: bold; font-size: 20px;"),
       icon = icon("stethoscope"),
       color = "red"
