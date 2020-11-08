@@ -251,15 +251,15 @@ server <- function(input, output) {
   data_df <- aggregate(list(Deaths = data$Deaths, Active_cases = data$Active_cases), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm = TRUE, na.action = NULL)
 
   covid_pl_sick <- function(x) {
-    sick <- sum(as.numeric(data$Active_cases), na.rm = TRUE)
+    sick <- sum(as.numeric(data_pl$Infected_per_Day), na.rm = TRUE) - sum(as.numeric(data_pl$Recovered_per_Day), na.rm = TRUE)
   }
 
   covid_pl_death <- function(x) {
-    death <- sum(as.numeric(data$Deaths), na.rm = TRUE)
+    death <- sum(as.numeric(data_pl$Deaths_per_Day), na.rm = TRUE)
   }
 
   covid_pl_recovered <- function(x) {
-    recovered <- sum(as.numeric(data$Recovered), na.rm = TRUE)
+    recovered <- sum(as.numeric(data_pl$Recovered_per_Day), na.rm = TRUE)
   }
 
   # Reactive
