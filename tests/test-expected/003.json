@@ -1,7 +1,7 @@
 {
   "output": {
     "box.recovered": {
-      "html": "<div class=\"small-box bg-green\">\n  <div class=\"inner\">\n    <h3>Recovered:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">171788<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-heartbeat\"><\/i>\n  <\/div>\n<\/div>",
+      "html": "<div class=\"small-box bg-green\">\n  <div class=\"inner\">\n    <h3>Recovered:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">200510<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-heartbeat\"><\/i>\n  <\/div>\n<\/div>",
       "deps": [
         {
           "name": "font-awesome",

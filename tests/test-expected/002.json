@@ -1,7 +1,7 @@
 {
   "output": {
     "box.death": {
-      "html": "<div class=\"small-box bg-red\">\n  <div class=\"inner\">\n    <h3>Total deaths:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">7287<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-times-circle\"><\/i>\n  <\/div>\n<\/div>",
+      "html": "<div class=\"small-box bg-red\">\n  <div class=\"inner\">\n    <h3>Total deaths:<\/h3>\n    <p>\n      <p style=\"font-weight: bold; font-size: 20px;\">7636<\/p>\n    <\/p>\n  <\/div>\n  <div class=\"icon-large\">\n    <i class=\"fa fa-times-circle\"><\/i>\n  <\/div>\n<\/div>",
       "deps": [
         {
           "name": "font-awesome",
