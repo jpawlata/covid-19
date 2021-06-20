@@ -28,6 +28,12 @@ Have a question? Contact me via Twitter [@justynapawlata](https://twitter.com/ju
 
 ## Changelog
 
+#### 2.2.1  - 2021/06/20
+
+- top boxes update
+- data table update
+- copyright update
+
 #### 2.2.0  - 2020/11/07
 
 - only one source of covid-19 data

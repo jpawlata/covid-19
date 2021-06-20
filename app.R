@@ -70,7 +70,7 @@ ui <- function(req) {
 
       # Tabs
       sidebarMenu(
-        menuItem("Charts", tabName = "charts", icon = icon("chart-bar"), badgeLabel = "New!", badgeColor = "green"),
+        menuItem("Charts", tabName = "charts", icon = icon("chart-bar")),
         menuItem("Map", tabName = "map", icon = icon("map-marked-alt")),
         menuItem("Data", tabName = "data", icon = icon("table")),
         menuItem("FAQ", tabName = "faq", icon = icon("info")),
@@ -95,7 +95,8 @@ ui <- function(req) {
             <td style='padding: 5px;'><a href='https://github.com/jpawlata/covid-19' target='_blank'><i class='fab fa-github fa-lg'></i></a></td>
           </tr></table>"
         ),
-        p(HTML("Copyright &copy; 2020 Justyna Pawlata"))
+        p(HTML("Copyright &copy; 2020 - 2021")),
+        p(HTML("Justyna Pawlata"))
       )
     ),
 
@@ -199,16 +200,16 @@ server <- function(input, output) {
     data_voiv <- read_sheet(url, sheet = "Aktualna sytuacja w Polsce")
     
     covid_voiv_temp <- data_voiv %>%
-      select(c(`Województwo`, `Suma potwierdzonych przypadków`, `Zgony*`, `Wyzdrowienia *`, `Nieaktywne przypadki`, `Aktywne przypadki*`)) %>%
+      select(c(`Województwo`, `Suma potwierdzonych przypadków`, `Suma zgonów *`, `Suma Wyzdrowień *`, `Nieaktywne przypadki`, `Aktywne przypadki *`)) %>%
       na.omit() %>%
       rename(Voivodeship = `Województwo`, 
              Confirmed_cases = `Suma potwierdzonych przypadków`, 
-             Deaths = `Zgony*`, 
-             Recovered = `Wyzdrowienia *`, 
+             Deaths = `Suma zgonów *`, 
+             Recovered = `Suma Wyzdrowień *`, 
              NonActive_cases = `Nieaktywne przypadki`, 
-             Active_cases = `Aktywne przypadki*`
+             Active_cases = `Aktywne przypadki *`
       ) %>%
-      filter(Voivodeship != 'POLSKA')
+      filter(Voivodeship != 'POLSKA (suma z woj.)')
     
     covid_voiv_final <- covid_voiv_temp
   }
@@ -251,7 +252,8 @@ server <- function(input, output) {
   data_df <- aggregate(list(Deaths = data$Deaths, Active_cases = data$Active_cases), by = list(Voivodeship = data$Voivodeship), FUN = sum, na.rm = TRUE, na.action = NULL)
 
   covid_pl_sick <- function(x) {
-    sick <- sum(as.numeric(data_pl$Infected_per_Day), na.rm = TRUE) - sum(as.numeric(data_pl$Recovered_per_Day), na.rm = TRUE)
+    #sick <- sum(as.numeric(data_pl$Infected_per_Day), na.rm = TRUE) - sum(as.numeric(data_pl$Recovered_per_Day) - sum(as.numeric(data_pl$Deaths_per_Day)), na.rm = TRUE)
+    sick <- sum(as.numeric(data$Active_cases), na.rm = TRUE)
   }
 
   covid_pl_death <- function(x) {
@@ -259,7 +261,7 @@ server <- function(input, output) {
   }
 
   covid_pl_recovered <- function(x) {
-    recovered <- sum(as.numeric(data_pl$Recovered_per_Day), na.rm = TRUE)
+    recovered <- sum(as.numeric(data$Recovered), na.rm = TRUE)
   }
 
   # Reactive
@@ -293,7 +295,11 @@ server <- function(input, output) {
   output$table <- renderDataTable({
     datatable(
       live_data_voiv(),
-      colnames = c("No.", "Voivodeship", "Confirmed cases", "Deaths", "Recovered", "Non Active cases", "Active cases")
+      colnames = c("No.", "Voivodeship", "Confirmed cases", "Deaths", "Recovered", "Non Active cases", "Active cases"),
+      options = list(
+        pageLength = 16,
+        lengthMenu = list(c(5, 10, -1), c('5', '10', 'All'))
+        )
     )
   })
   
